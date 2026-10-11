@@ -1,0 +1,52 @@
+<h1>hpcmehno's chatapp</h1>
+<title>hpcmehno's chatapp</title>
+<div style="margin: 5px; padding: 5px; outline: 1px solid black">
+	<input type="text" id="txt" placeholder="text">
+	<input id="name" placeholder="name">
+	<button id="btn">submit</button>
+	<button onclick="refresh()">refresh</button>
+</div>
+<div id="container" style="margin: 5px; padding: 5px; outline: 1px solid black; white-space: pre-line; max-height: 100px; overflow-y: auto"></div>
+<p>thanks for using!</p>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const a = document.getElementById("txt")
+const b = document.getElementById("name")
+const btn = document.getElementById("btn")
+const container = document.getElementById("container")
+const {createClient} = supabase
+const database = createClient('https://ycisphzvuxhxorwrvuam.supabase.co', 'sb_publishable_x-6_JGztxNF_8A1L9wJNig_00SAxm7d')
+
+btn.addEventListener("click", async () => {
+	const time = new Date().toLocaleString()
+	const msg = "[" + b.value.trim() + "] " + a.value.trim() + " (" + time + ")"
+	if (!msg) return
+	const {error} = await database.from("chatter").insert({
+		txt: msg
+	})
+	if (error) {
+		console.log("smth went wrong")
+	}
+	else {
+		console.log("yay!")
+	}
+	refresh()
+})
+async function refresh() {
+	const {data, error} = await database.from("chatter").select("txt")
+	if (error) {
+		console.log(error)
+	}
+	else {
+		container.textContent = ''
+		let a = ''
+		data.forEach((row) => {
+			a += row.txt + `\n`
+		})
+		container.textContent = a
+		container.scrollTop = container.scrollHeight
+	}
+}
+refresh()
+
+</script>
